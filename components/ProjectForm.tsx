@@ -2,23 +2,56 @@
 
 import { SessionInterface } from "@/common.types";
 import Image from "next/image";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import FormField from "./FormField";
+import { categoryFilters } from "@/constants";
+import CustomMenu from "./CustomMenu";
+import Button from "./Button";
 
 type Props = {
   type: string;
   session: SessionInterface;
 };
 
-const handleFormSubmit = (e: React.FormEvent) => {};
-const handleChangeImage = (e: ChangeEvent<HTMLInputElement>) => {};
-
-const handleStateChange = (fieldName: string, value: string) => {};
-const form = {
-  image: "",
-};
+interface FormInterface {
+  title: string;
+  description: string;
+  liveSiteUrl: string;
+  githubUrl: string;
+  category: string;
+  image: string;
+}
 
 const ProjectForm = ({ type, session }: Props) => {
+  const handleFormSubmit = (e: React.FormEvent) => {};
+  const handleChangeImage = (e: ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const result = reader.result as string;
+      handleStateChange("image", result);
+    };
+  };
+
+  const handleStateChange = (fieldName: string, value: string) => {
+    setform((prevState) => ({
+      ...prevState,
+      [fieldName]: value,
+    }));
+  };
+
+  const [form, setform] = useState<FormInterface>({
+    title: "",
+    description: "",
+    liveSiteUrl: "",
+    githubUrl: "",
+    category: "",
+    image: "",
+  });
+
   return (
     <form onSubmit={handleFormSubmit} className="flexStart form">
       <div className="flexStart form_image-container">
@@ -69,9 +102,20 @@ const ProjectForm = ({ type, session }: Props) => {
         setState={(value) => handleStateChange("githubUrl", value)}
       />
       {/* CustomInput Category */}
+      <CustomMenu
+        title="Category"
+        state={form.category}
+        filters={categoryFilters}
+        setState={(value) => handleStateChange("category", value)}
+      />
 
       <div className="flexStart w-full">
-        <button>Create</button>
+        <Button
+          type="submit"
+          title="Create"
+          leftIcon={isSubmitting ? "" : "/plus.svg"}
+          isSubmitting={isSubmitting}
+        />
       </div>
     </form>
   );
